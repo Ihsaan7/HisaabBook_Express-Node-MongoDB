@@ -57,7 +57,8 @@ async function checkOwnership(req, res, next) {
       return res.status(404).send("Hisaab not found");
     }
     
-    if (hisaab.userId.toString() !== req.session.userId.toString()) {
+    // Compare MongoDB _id from session with hisaab.user field (not hisaab.userId)
+    if (hisaab.user.toString() !== req.session.userId.toString()) {
       return res.status(403).send("Access denied. You can only modify your own hisaabs.");
     }
     
@@ -70,12 +71,37 @@ async function checkOwnership(req, res, next) {
 
 // Routes
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
   try {
-    res.render("main");
+    // Check if user is logged in
+    const isLoggedIn = !!req.session.userId;
+    let userUId = null;
+    
+    if (isLoggedIn) {
+      // Get the user's custom uId from database
+      const user = await userModel.findById(req.session.userId);
+      if (user) {
+        userUId = user.uId;
+      }
+    }
+    
+    res.render("main", { isLoggedIn, userId: userUId });
   } catch (err) {
     console.log(err);
+    res.status(500).send("Server error");
   }
+});
+
+// Logout
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Session destruction error:', err);
+      return res.status(500).send("Error logging out");
+    }
+    res.clearCookie('connect.sid'); // Clear session cookie
+    res.redirect("/");
+  });
 });
 
 // SignUp
@@ -95,9 +121,12 @@ app.post("/signUp", async (req, res) => {
 
   try {
     const userAcc = await userModel.create({ username, email, password , uId:idDate , dateCreated:nameDate });
-    res.redirect("/");
+    // Set session after successful signup
+    req.session.userId = userAcc._id;
+    res.redirect("/"); // Redirect to main route with session
   } catch (err) {
     console.log(err);
+    res.status(500).send("Error creating account");
   }
 });
 
@@ -123,7 +152,7 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid Credentials" });
     }
     req.session.userId = user._id; // Set session userId for authentication
-    res.redirect(`/show/${user.uId}`); // Redirect using your custom user id
+    res.redirect("/"); // Redirect to main route after login
 
   } catch (err) {
     console.log(err);
@@ -217,8 +246,8 @@ app.get("/showDetail/:uId", async (req, res) => {
     // Pass the user's uId (from the hisaab record) for navbar links
     const userUId = hisaabId.userId;
     
-    // Check if current user is the owner
-    const isOwner = req.session.userId && req.session.userId.toString() === hisaabId.userId.toString();
+    // Check if current user is the owner by comparing MongoDB _id with hisaab.user field
+    const isOwner = req.session.userId && req.session.userId.toString() === hisaabId.user.toString();
     
     res.render("hisaabDetail", { hisaabId, hId, flag, userUId, isOwner }); // Pass isOwner flag to template
   } catch (err) {
