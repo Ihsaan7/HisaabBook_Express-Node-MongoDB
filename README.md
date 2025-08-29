@@ -1,2 +1,23 @@
-# HisaabBook_Express-Node-MongoDB
-# 📚 Khaatabook - Digital Ledger App 🔐 Secure Personal Finance Tracker A modern web app for managing personal accounts with encryption, sharing, and user authentication.  ## ✨ Features - 🔒 Password-protected entries - 👥 Shareable ledgers - 🌙 Dark/Light themes - 📱 Responsive design Tech: Node.js, Express, MongoDB, EJS
+# 📊 HisaabBook - Modern Financial Record Manager
+🚀 A sleek web application for managing personal financial records (hisaabs) built with Node.js, Express, and MongoDB.
+
+## ✨ Features
+- 🔐 Secure Authentication - User registration, login with session management
+- 📝 Hisaab Management - Create, view, update, and delete financial records
+- 🔒 Password Protection - Secure sensitive hisaabs with passcodes
+- 🌙 Dark/Light Theme - Modern UI with theme toggle functionality
+- 📱 Responsive Design - Works seamlessly on desktop and mobile
+- 🎨 Modern Interface - Clean, professional design with enhanced UX
+## 🛠️ Tech Stack
+- Backend : Node.js, Express.js
+- Database : MongoDB with Mongoose
+- Frontend : EJS templating, CSS3, JavaScript
+- Session : Express-session with MongoDB store
+## 🚀 Quick Start
+```
+npm install
+npm start
+```
+📍 Access : http://localhost:8000
+
+Perfect for individuals and small businesses to track financial records securely! 💼
