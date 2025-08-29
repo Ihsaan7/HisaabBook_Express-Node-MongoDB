@@ -230,7 +230,7 @@ app.get("/show/:uId", requireLogin ,async (req,res)=>
             console.log(err)
         }
 
-    })
+    });
 
 app.get("/showDetail/:uId", async (req, res) => {
   const hId = req.params.uId;
@@ -306,7 +306,7 @@ app.get("/delete/:hId", requireLogin, checkOwnership, async (req,res)=>
       console.error('Error deleting hisaab:', err);
       res.status(500).send("Error deleting hisaab");
     }
-  })
+  });
 
   app.get("/update/:uId",requireLogin, checkOwnership, async (req,res)=>
     {
@@ -327,7 +327,7 @@ app.get("/delete/:hId", requireLogin, checkOwnership, async (req,res)=>
         console.error('Error loading update form:', err);
         res.status(500).send("Error loading update form");
       }
-    })
+    });
 
   app.post("/update/:uId", requireLogin, checkOwnership, async (req, res) => {
     const hId = req.params.uId;
@@ -359,7 +359,7 @@ app.get("/delete/:hId", requireLogin, checkOwnership, async (req,res)=>
       console.error('Error updating hisaab:', err);
       res.status(500).send("Error updating hisaab");
     }
-  })
+  });
 // Server
 const PORT = process.env.PORT || 8000;
 
