@@ -10,9 +10,10 @@ const cookieParser = require("cookie-parser");
 // Middleware
 app.use(cookieParser());
 app.set("view engine", "ejs");
+app.set("views", __dirname + "/views"); // Explicitly set views directory for Vercel
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public')); // Serve static files from public directory
+app.use(express.static(__dirname + '/public')); // Serve static files from public directory with absolute path
 app.use(session({
   secret: process.env.SESSION_SECRET || "224466",
   resave: false,

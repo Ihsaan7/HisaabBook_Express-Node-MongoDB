@@ -1,4 +1,5 @@
-// Vercel entry point
-const app = require('./views/signUp.ejs');
+// Entry point for Vercel deployment
+const app = require('./app');
 
+// Export the Express app for Vercel
 module.exports = app;
