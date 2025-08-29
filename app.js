@@ -14,11 +14,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public')); // Serve static files from public directory
 app.use(session({
-  secret: "224466",
+  secret: process.env.SESSION_SECRET || "224466",
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: 'mongodb://127.0.0.1:27017/hisaabbook',
+    mongoUrl: process.env.MONGODB_URI || 'mongodb+srv://Test:CUHSb1Q37L0Na1JP@cluster0.ip1tc2f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
     touchAfter: 24 * 3600 // lazy session update
   }),
   cookie: {
@@ -361,9 +361,17 @@ app.get("/delete/:hId", requireLogin, checkOwnership, async (req,res)=>
     }
   })
 // Server
-app.listen(8000, () => {
-  console.log("Server is running..");
-});
+const PORT = process.env.PORT || 8000;
+
+// Only start the server if not in Vercel environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+// Export the app for Vercel
+module.exports = app;
 
 
 
