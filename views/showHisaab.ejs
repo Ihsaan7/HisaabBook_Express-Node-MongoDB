@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Optional: Modern Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <nav
+    class="w-full py-4 px-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] flex items-center justify-between border-b border-gray-200">
+    <h2 class="text-black text-xl font-semibold">Khaatabook</h2>
+    <div class="flex gap-5 items-center text-black">
+      <a href="/">Home</a>
+      <a href="/create/<%= userId %>">Create New Hisaab</a>
+    </div>
+  </nav>
+
+  <div>
+    <div class="py-5 flex justify-center">
+      <h2 class="text-3xl font-bold text-blue-700">Hisaab</h2>
+    </div>
+    <div class="border flex flex-wrap gap-4 justify-center pt-10 pb-5">
+      <% userData.forEach(hisaab=> { %>
+        <div class="hisaabBox border w-fit ml-10">
+          <div class="flex gap-10 px-5 py-2">
+            <% if (hisaab.encrypt) { %>
+              <p><span>⛔</span>Encrypted</p>
+              <% } else { %>
+                <p><span>✅</span>Available</p>
+                <% } %>
+                  <p>
+                    <%= hisaab.nameDate %>
+                  </p>
+          </div>
+          <div class="py-6">
+            <h3 class="border py-5 flex justify-center">
+              <%= hisaab.topic %>
+            </h3>
+            <div class="flex gap-2 mx-2 mt-2">
+              <a href="/showDetail/<%= hisaab._id %>"
+                class="p-2 border bg-gray-200 text-black hover:text-blue-700 inline-block">
+                view hisaab
+              </a>
+              <% if (hisaab.isShare) { %>
+                <button 
+                  onclick="shareHisaab('<%= hisaab._id %>', '<%= hisaab.topic %>')"
+                  class="p-2 border bg-blue-500 text-white hover:bg-blue-600 inline-block cursor-pointer">
+                  📤 Share
+                </button>
+              <% } else { %>
+                <span class="p-2 border bg-gray-300 text-gray-500 inline-block cursor-not-allowed">
+                  🔒 Not Shareable
+                </span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+
+    </div>
+  </div>
+  <script>
+    function shareHisaab(hisaabId, topic) {
+      const shareUrl = `${window.location.origin}/showDetail/${hisaabId}`;
+      const shareData = {
+        title: `Hisaab: ${topic}`,
+        text: `Check out this hisaab: ${topic}`,
+        url: shareUrl
+      };
+
+      // Check if Web Share API is supported
+      if (navigator.share) {
+        navigator.share(shareData)
+          .then(() => console.log('Hisaab shared successfully'))
+          .catch((error) => {
+            console.log('Error sharing:', error);
+            fallbackShare(shareUrl, topic);
+          });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        fallbackShare(shareUrl, topic);
+      }
+    }
+
+    function fallbackShare(url, topic) {
+      // Copy to clipboard as fallback
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            alert(`Link copied to clipboard!\n\nHisaab: ${topic}\nLink: ${url}`);
+          })
+          .catch(() => {
+            // Manual copy fallback
+            showShareDialog(url, topic);
+          });
+      } else {
+        showShareDialog(url, topic);
+      }
+    }
+
+    function showShareDialog(url, topic) {
+      const shareText = `Hisaab: ${topic}\nLink: ${url}`;
+      prompt('Copy this link to share:', url);
+    }
+  </script>
+</body>
+
+</html>
