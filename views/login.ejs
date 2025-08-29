@@ -3,42 +3,115 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Optional: Modern Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <title>Login - Khaatabook</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      padding: var(--spacing-4);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      padding: var(--spacing-8);
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: var(--spacing-8);
+    }
+    .auth-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-2);
+    }
+    .auth-subtitle {
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+    }
+    .auth-footer {
+      text-align: center;
+      margin-top: var(--spacing-6);
+      padding-top: var(--spacing-6);
+      border-top: 1px solid var(--border-primary);
     }
   </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-  <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Welcome Back!</h2>
-
-    <form action="/login" method="POST" class="space-y-5">
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-        <input type="text" id="username" name="username" required
-          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span style="margin-right: 8px;">📊</span>Khaatabook
+        </a>
+        <div class="navbar-nav">
+          <a href="/signUp" class="navbar-link">Sign Up</a>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
       </div>
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" name="password" required
-          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" />
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card fade-in">
+      <div class="auth-header">
+        <h1 class="auth-title">Welcome Back! 👋</h1>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
       </div>
 
-      <button type="submit"
-        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-200">
-        Submit
-      </button>
-    </form>
+      <form action="/login" method="POST" class="form" id="login-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            class="form-input" 
+            placeholder="Enter your username"
+            required 
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-input" 
+            placeholder="Enter your password"
+            required 
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          <span>🔑</span> Sign In
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
+          Don't have an account? 
+          <a href="/signUp" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+            Sign up here
+          </a>
+        </p>
+      </div>
+    </div>
   </div>
 
+  <script src="/js/theme.js"></script>
 </body>
 </html>

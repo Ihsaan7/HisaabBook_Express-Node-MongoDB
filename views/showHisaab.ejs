@@ -1,78 +1,372 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Optional: Modern Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <title>My Hisaabs - Khaatabook</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
+    .hisaabs-container {
+      min-height: calc(100vh - 80px);
+      padding: var(--spacing-8) 0;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+    .hisaabs-header {
+      text-align: center;
+      margin-bottom: var(--spacing-8);
+    }
+    .hisaabs-title {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-2);
+    }
+    .hisaabs-subtitle {
+      color: var(--text-secondary);
+      font-size: var(--font-size-lg);
+    }
+    .search-filter-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-6);
+      margin-bottom: var(--spacing-8);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-primary);
+    }
+    .hisaab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: var(--spacing-6);
+      margin-top: var(--spacing-6);
+    }
+    .hisaab-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-6);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .hisaab-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl);
+    }
+    .hisaab-status {
+      position: absolute;
+      top: var(--spacing-4);
+      right: var(--spacing-4);
+      padding: var(--spacing-1) var(--spacing-3);
+      border-radius: var(--radius-full);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .status-encrypted {
+      background: var(--warning-light);
+      color: var(--warning-color);
+    }
+    .status-open {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+    .hisaab-date {
+      color: var(--text-secondary);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-3);
+    }
+    .hisaab-title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-4);
+      line-height: 1.3;
+    }
+    .hisaab-actions {
+      display: flex;
+      gap: var(--spacing-3);
+      margin-top: var(--spacing-4);
+    }
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-16) var(--spacing-8);
+      color: var(--text-secondary);
+    }
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: var(--spacing-4);
+      opacity: 0.5;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: var(--spacing-2);
+      margin-bottom: var(--spacing-4);
+    }
+    .filter-tab {
+      padding: var(--spacing-2) var(--spacing-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+    }
+    .filter-tab.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--spacing-4);
+      margin-bottom: var(--spacing-6);
+    }
+    .stat-card {
+      background: var(--bg-secondary);
+      padding: var(--spacing-4);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      border: 1px solid var(--border-secondary);
+    }
+    .stat-number {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-top: var(--spacing-1);
     }
   </style>
 </head>
-
 <body>
-  <nav
-    class="w-full py-4 px-6 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] flex items-center justify-between border-b border-gray-200">
-    <h2 class="text-black text-xl font-semibold">Khaatabook</h2>
-    <div class="flex gap-5 items-center text-black">
-      <a href="/">Home</a>
-      <a href="/create/<%= userId %>">Create New Hisaab</a>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span style="margin-right: 8px;">📊</span>Khaatabook
+        </a>
+        <div class="navbar-nav">
+          <a href="/" class="navbar-link">Home</a>
+          <a href="/create/<%= userId %>" class="btn btn-primary btn-sm">
+            <span>➕</span> Create New
+          </a>
+          <a href="/logout" class="navbar-link" style="color: var(--danger-color);">Logout</a>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
 
-  <div>
-    <div class="py-5 flex justify-center">
-      <h2 class="text-3xl font-bold text-blue-700">Hisaab</h2>
-    </div>
-    <div class="border flex flex-wrap gap-4 justify-center pt-10 pb-5">
-      <% userData.forEach(hisaab=> { %>
-        <div class="hisaabBox border w-fit ml-10">
-          <div class="flex gap-10 px-5 py-2">
-            <% if (hisaab.encrypt) { %>
-              <p><span>⛔</span>Encrypted</p>
-              <% } else { %>
-                <p><span>✅</span>Available</p>
-                <% } %>
-                  <p>
-                    <%= hisaab.nameDate %>
-                  </p>
+  <div class="hisaabs-container">
+    <div class="container">
+      <!-- Header -->
+      <div class="hisaabs-header fade-in">
+        <h1 class="hisaabs-title">My Hisaabs 📚</h1>
+        <p class="hisaabs-subtitle">Manage and organize your financial records</p>
+      </div>
+
+      <!-- Search and Filter Section -->
+      <div class="search-filter-section fade-in">
+        <!-- Statistics -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number" id="total-count"><%= userData.length %></div>
+            <div class="stat-label">Total Hisaabs</div>
           </div>
-          <div class="py-6">
-            <h3 class="border py-5 flex justify-center">
-              <%= hisaab.topic %>
-            </h3>
-            <div class="flex gap-2 mx-2 mt-2">
-              <a href="/showDetail/<%= hisaab._id %>"
-                class="p-2 border bg-gray-200 text-black hover:text-blue-700 inline-block">
-                view hisaab
-              </a>
-              <% if (hisaab.isShare) { %>
-                <button 
-                  onclick="shareHisaab('<%= hisaab._id %>', '<%= hisaab.topic %>')"
-                  class="p-2 border bg-blue-500 text-white hover:bg-blue-600 inline-block cursor-pointer">
-                  📤 Share
-                </button>
-              <% } else { %>
-                <span class="p-2 border bg-gray-300 text-gray-500 inline-block cursor-not-allowed">
-                  🔒 Not Shareable
-                </span>
-              <% } %>
-            </div>
+          <div class="stat-card">
+            <div class="stat-number" id="encrypted-count">0</div>
+            <div class="stat-label">Encrypted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="shareable-count">0</div>
+            <div class="stat-label">Shareable</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="recent-count">0</div>
+            <div class="stat-label">This Month</div>
           </div>
         </div>
-        <% }) %>
 
+        <!-- Search Bar -->
+        <div class="form-group">
+          <input 
+            type="text" 
+            id="search-input" 
+            class="form-input" 
+            placeholder="🔍 Search hisaabs by title or date..."
+          />
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All Hisaabs</button>
+          <button class="filter-tab" data-filter="encrypted">🔒 Encrypted</button>
+          <button class="filter-tab" data-filter="open">🔓 Open</button>
+          <button class="filter-tab" data-filter="shareable">🔗 Shareable</button>
+          <button class="filter-tab" data-filter="recent">📅 Recent</button>
+        </div>
+      </div>
+
+      <!-- Hisaabs Grid -->
+      <% if (userData.length > 0) { %>
+        <div class="hisaab-grid" id="hisaabs-container">
+          <% userData.forEach(hisaab => { %>
+            <div class="hisaab-card fade-in" 
+                 data-encrypted="<%= hisaab.encrypt %>" 
+                 data-shareable="<%= hisaab.isShare %>"
+                 data-date="<%= hisaab.nameDate %>"
+                 data-title="<%= hisaab.topic.toLowerCase() %>">
+              
+              <!-- Status Badge -->
+              <div class="hisaab-status <%= hisaab.encrypt ? 'status-encrypted' : 'status-open' %>">
+                <% if (hisaab.encrypt) { %>
+                  🔒 Encrypted
+                <% } else { %>
+                  🔓 Open
+                <% } %>
+              </div>
+
+              <!-- Date -->
+              <div class="hisaab-date">
+                📅 Created on <%= hisaab.nameDate %>
+              </div>
+
+              <!-- Title -->
+              <h3 class="hisaab-title"><%= hisaab.topic %></h3>
+
+              <!-- Preview -->
+              <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-4);">
+                <% if (hisaab.encrypt) { %>
+                  🔐 This hisaab is password protected
+                <% } else { %>
+                  <%= hisaab.data ? hisaab.data.substring(0, 100) + (hisaab.data.length > 100 ? '...' : '') : 'No preview available' %>
+                <% } %>
+              </div>
+
+              <!-- Actions -->
+              <div class="hisaab-actions">
+                <a href="/showDetail/<%= hisaab._id %>" class="btn btn-primary btn-sm" style="flex: 1;">
+                  <span>👁️</span> View Details
+                </a>
+                
+                <% if (hisaab.isShare) { %>
+                  <button 
+                    onclick="shareHisaab('<%= hisaab._id %>', '<%= hisaab.topic %>')"
+                    class="btn btn-secondary btn-sm"
+                    title="Share this hisaab">
+                    <span>📤</span>
+                  </button>
+                <% } else { %>
+                  <button class="btn btn-secondary btn-sm" disabled title="Not shareable">
+                    <span>🔒</span>
+                  </button>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <!-- Empty State -->
+        <div class="empty-state fade-in">
+          <div class="empty-icon">📝</div>
+          <h3 style="font-size: var(--font-size-xl); font-weight: 600; margin-bottom: var(--spacing-2);">No Hisaabs Yet</h3>
+          <p style="margin-bottom: var(--spacing-6);">Start by creating your first financial record</p>
+          <a href="/create/<%= userId %>" class="btn btn-primary btn-lg">
+            <span>➕</span> Create Your First Hisaab
+          </a>
+        </div>
+      <% } %>
     </div>
   </div>
+
+  <script src="/js/theme.js"></script>
   <script>
+    // Calculate and update statistics
+    function updateStats() {
+      const hisaabs = document.querySelectorAll('.hisaab-card');
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+      
+      let encryptedCount = 0;
+      let shareableCount = 0;
+      let recentCount = 0;
+      
+      hisaabs.forEach(card => {
+        if (card.dataset.encrypted === 'true') encryptedCount++;
+        if (card.dataset.shareable === 'true') shareableCount++;
+        if (card.dataset.date && card.dataset.date.startsWith(currentMonth)) recentCount++;
+      });
+      
+      document.getElementById('encrypted-count').textContent = encryptedCount;
+      document.getElementById('shareable-count').textContent = shareableCount;
+      document.getElementById('recent-count').textContent = recentCount;
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const hisaabsContainer = document.getElementById('hisaabs-container');
+    
+    function filterHisaabs() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
+      const hisaabs = document.querySelectorAll('.hisaab-card');
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      
+      hisaabs.forEach(card => {
+        const title = card.dataset.title;
+        const date = card.dataset.date;
+        const encrypted = card.dataset.encrypted === 'true';
+        const shareable = card.dataset.shareable === 'true';
+        const isRecent = date && date.startsWith(currentMonth);
+        
+        // Search filter
+        const matchesSearch = title.includes(searchTerm) || date.includes(searchTerm);
+        
+        // Category filter
+        let matchesFilter = true;
+        switch (activeFilter) {
+          case 'encrypted':
+            matchesFilter = encrypted;
+            break;
+          case 'open':
+            matchesFilter = !encrypted;
+            break;
+          case 'shareable':
+            matchesFilter = shareable;
+            break;
+          case 'recent':
+            matchesFilter = isRecent;
+            break;
+          default:
+            matchesFilter = true;
+        }
+        
+        card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+      });
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterHisaabs);
+    
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        filterHisaabs();
+      });
+    });
+
+    // Share functionality
     function shareHisaab(hisaabId, topic) {
       const shareUrl = `${window.location.origin}/showDetail/${hisaabId}`;
       const shareData = {
@@ -81,7 +375,6 @@
         url: shareUrl
       };
 
-      // Check if Web Share API is supported
       if (navigator.share) {
         navigator.share(shareData)
           .then(() => console.log('Hisaab shared successfully'))
@@ -90,20 +383,17 @@
             fallbackShare(shareUrl, topic);
           });
       } else {
-        // Fallback for browsers that don't support Web Share API
         fallbackShare(shareUrl, topic);
       }
     }
 
     function fallbackShare(url, topic) {
-      // Copy to clipboard as fallback
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url)
           .then(() => {
             alert(`Link copied to clipboard!\n\nHisaab: ${topic}\nLink: ${url}`);
           })
           .catch(() => {
-            // Manual copy fallback
             showShareDialog(url, topic);
           });
       } else {
@@ -112,10 +402,11 @@
     }
 
     function showShareDialog(url, topic) {
-      const shareText = `Hisaab: ${topic}\nLink: ${url}`;
       prompt('Copy this link to share:', url);
     }
+
+    // Initialize
+    updateStats();
   </script>
 </body>
-
 </html>

@@ -3,84 +3,261 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Khaatabook</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Create New Hisaab - Khaatabook</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="/css/styles.css" rel="stylesheet" />
+  <style>
+    .create-container {
+      min-height: calc(100vh - 80px);
+      padding: var(--spacing-8) 0;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+    .create-card {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-primary);
+      padding: var(--spacing-8);
+    }
+    .create-header {
+      text-align: center;
+      margin-bottom: var(--spacing-8);
+    }
+    .create-title {
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-2);
+    }
+    .create-subtitle {
+      color: var(--text-secondary);
+      font-size: var(--font-size-base);
+    }
+    .permissions-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6);
+      border: 1px solid var(--border-secondary);
+    }
+    .permission-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-md);
+      transition: background-color 0.2s ease;
+    }
+    .permission-item:hover {
+      background: var(--bg-card);
+    }
+    .permission-description {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-top: var(--spacing-1);
+    }
+  </style>
 </head>
-<body class="bg-white text-gray-800">
-  <nav class="w-full py-4 px-6 flex items-center justify-between border-b border-gray-200">
-    <h2 class="text-blue-500 text-xl font-semibold">Khaatabook</h2>
-    <div class="flex gap-5 items-center text-blue-500">
-      <a href="/">Home</a>
-<a href="/create/<%= userId %>">Create New Hisaab</a>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <div class="navbar-content">
+        <a href="/" class="navbar-brand">
+          <span style="margin-right: 8px;">📊</span>Khaatabook
+        </a>
+        <div class="navbar-nav">
+          <a href="/" class="navbar-link">Home</a>
+          <a href="/show/<%= userId %>" class="navbar-link">My Hisaabs</a>
+          <a href="/logout" class="navbar-link" style="color: var(--danger-color);">Logout</a>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-icon">🌙</span>
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
 
-  <section class="p-6 max-w-3xl mx-auto">
-    <h1 class="font-semibold text-xl text-blue-500 mb-4">Create New Hisaab of <% userId %></h1>
-    <form action="/create/<%= userId %>" method="post" class="flex flex-col gap-6 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-      
-      <!-- Title Field -->
-      <div>
-        <label for="title" class="block text-sm font-medium text-blue-500 mb-1">Title</label>
-        <input type="text" name="title" id="title" class="w-full p-2 rounded-md border border-gray-300 bg-white text-blue-500 placeholder-blue-300" placeholder="Enter topic or heading" />
+  <div class="create-container">
+    <div class="container">
+      <div class="create-card fade-in">
+        <div class="create-header">
+          <h1 class="create-title">Create New Hisaab 📝</h1>
+          <p class="create-subtitle">Add a new financial record to your collection</p>
+        </div>
+
+        <form action="/create/<%= userId %>" method="post" class="form" id="create-form">
+          <!-- Title Field -->
+          <div class="form-group">
+            <label for="title" class="form-label">
+              <span>📋</span> Title
+            </label>
+            <input 
+              type="text" 
+              name="title" 
+              id="title" 
+              class="form-input" 
+              placeholder="Enter a descriptive title for your hisaab"
+              required 
+            />
+          </div>
+
+          <!-- Details Textarea -->
+          <div class="form-group">
+            <label for="hisaab" class="form-label">
+              <span>📄</span> Details
+            </label>
+            <textarea 
+              name="hisaab" 
+              id="hisaab" 
+              class="form-textarea" 
+              rows="8"
+              placeholder="Write your hisaab details here... Include amounts, dates, descriptions, or any relevant information."
+              required
+            ></textarea>
+          </div>
+
+          <!-- Permissions Section -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>🔐</span> Privacy & Sharing Options
+            </label>
+            <div class="permissions-section">
+              <!-- Encrypt Option -->
+              <div class="permission-item">
+                <input 
+                  type="checkbox" 
+                  name="encrypt" 
+                  id="encrypt" 
+                  class="form-checkbox"
+                />
+                <div style="flex: 1;">
+                  <label for="encrypt" class="form-label" style="margin: 0; font-weight: 500;">
+                    🔒 Encrypt with Password
+                  </label>
+                  <p class="permission-description">
+                    Protect your hisaab with a secret code. Only those with the password can view the content.
+                  </p>
+                </div>
+              </div>
+              
+              <div class="form-group" id="secret-code-group" style="display: none; margin-top: var(--spacing-4);">
+                <input
+                  type="password"
+                  name="secretCode"
+                  id="secretCode"
+                  class="form-input"
+                  placeholder="Enter a strong secret code"
+                  disabled
+                />
+              </div>
+
+              <!-- Shareable Option -->
+              <div class="permission-item">
+                <input 
+                  type="checkbox" 
+                  name="shareable" 
+                  id="shareable" 
+                  class="form-checkbox"
+                />
+                <div style="flex: 1;">
+                  <label for="shareable" class="form-label" style="margin: 0; font-weight: 500;">
+                    🔗 Make Shareable
+                  </label>
+                  <p class="permission-description">
+                    Allow others to view this hisaab via a shareable link.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Edit Permissions Option -->
+              <div class="permission-item">
+                <input 
+                  type="checkbox" 
+                  name="editable" 
+                  id="editable" 
+                  class="form-checkbox"
+                />
+                <div style="flex: 1;">
+                  <label for="editable" class="form-label" style="margin: 0; font-weight: 500;">
+                    ✏️ Allow Editing
+                  </label>
+                  <p class="permission-description">
+                    Let others edit this hisaab when shared (requires shareable to be enabled).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex gap-4" style="margin-top: var(--spacing-8);">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+              <span>💾</span> Create Hisaab
+            </button>
+            <a href="/show/<%= userId %>" class="btn btn-secondary btn-lg">
+              <span>❌</span> Cancel
+            </a>
+          </div>
+        </form>
       </div>
+    </div>
+  </div>
 
-      <!-- Hisaab Textarea -->
-      <div>
-        <label for="hisaab" class="block text-sm font-medium text-blue-500 mb-1">Details</label>
-        <textarea name="hisaab" id="hisaab" class="w-full h-40 p-2 rounded-md border border-gray-300 bg-white text-blue-500 placeholder-blue-300" placeholder="Write your Hisaab here..."></textarea>
-      </div>
-
-      <!-- Permissions Section -->
-      <fieldset class="flex flex-col gap-4">
-        <legend class="text-sm font-semibold text-blue-500">Permissions</legend>
-
-        <!-- Encrypt Option -->
-        <div class="flex items-center gap-3">
-          <input type="checkbox" name="encrypt" id="encrypt" class="w-4 h-4 text-blue-500 border-gray-300 rounded-sm focus:ring-blue-300" />
-          <label for="encrypt" class="text-sm text-gray-700">Encrypt</label>
-          <input
-  type="text"
-  name="secretCode"
-  placeholder="Secret code"
-  class="p-1 rounded-md border border-gray-300 bg-gray-100 disabled:bg-gray-100 text-sm text-blue-500 placeholder-blue-300"
-/>
-
-        </div>
-
-        <!-- Shareable Option -->
-        <div class="flex items-center gap-3">
-          <input type="checkbox" name="shareable" id="shareable" class="w-4 h-4 text-blue-500 border-gray-300 rounded-sm focus:ring-blue-300" />
-          <label for="shareable" class="text-sm text-gray-700">Shareable</label>
-        </div>
-
-        <!-- Edit Permissions Option -->
-        <div class="flex items-center gap-3">
-          <input type="checkbox" name="editable" id="editable" class="w-4 h-4 text-blue-500 border-gray-300 rounded-sm focus:ring-blue-300" />
-          <label for="editable" class="text-sm text-gray-700">Edit Permissions</label>
-        </div>
-      </fieldset>
-
-      <!-- Submit Button -->
-      <input type="submit" value="Submit" class="bg-blue-100 text-blue-600 px-6 py-2 rounded-md font-semibold hover:bg-blue-200 transition" />
-    </form>
-  </section>
-
-
-
-
+  <script src="/js/theme.js"></script>
   <script>
-  const encryptCheckbox = document.getElementById("encrypt");
-  const secretCodeInput = document.querySelector("input[name='secretCode']");
+    // Enhanced form interactions
+    const encryptCheckbox = document.getElementById("encrypt");
+    const secretCodeInput = document.getElementById("secretCode");
+    const secretCodeGroup = document.getElementById("secret-code-group");
+    const shareableCheckbox = document.getElementById("shareable");
+    const editableCheckbox = document.getElementById("editable");
 
-  // Disable the input by default
-  secretCodeInput.disabled = true;
+    // Handle encrypt checkbox
+    encryptCheckbox.addEventListener("change", () => {
+      const isChecked = encryptCheckbox.checked;
+      secretCodeInput.disabled = !isChecked;
+      secretCodeGroup.style.display = isChecked ? "block" : "none";
+      
+      if (!isChecked) {
+        secretCodeInput.value = "";
+      } else {
+        secretCodeInput.focus();
+      }
+    });
 
-  // Toggle input based on checkbox
-  encryptCheckbox.addEventListener("change", () => {
-    secretCodeInput.disabled = !encryptCheckbox.checked;
-  });
-</script>
+    // Handle editable checkbox dependency on shareable
+    shareableCheckbox.addEventListener("change", () => {
+      if (!shareableCheckbox.checked) {
+        editableCheckbox.checked = false;
+        editableCheckbox.disabled = true;
+      } else {
+        editableCheckbox.disabled = false;
+      }
+    });
 
+    // Initialize editable state
+    editableCheckbox.disabled = !shareableCheckbox.checked;
+
+    // Form validation
+    document.getElementById("create-form").addEventListener("submit", (e) => {
+      const title = document.getElementById("title").value.trim();
+      const hisaab = document.getElementById("hisaab").value.trim();
+      
+      if (!title || !hisaab) {
+        e.preventDefault();
+        alert("Please fill in both title and details fields.");
+        return;
+      }
+      
+      if (encryptCheckbox.checked && !secretCodeInput.value.trim()) {
+        e.preventDefault();
+        alert("Please enter a secret code for encryption.");
+        secretCodeInput.focus();
+        return;
+      }
+    });
+  </script>
 </body>
 </html>
