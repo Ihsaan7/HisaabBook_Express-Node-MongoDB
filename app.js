@@ -3,8 +3,8 @@ const app = express();
 const dbConnect = require("./config/db");
 const userModel = require("./models/user");
 const hisaabModel = require("./models/hisaab");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
 // Middleware
@@ -15,43 +15,37 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public')); // Serve static files from public directory with absolute path
 // Validate required environment variables
-if (!process.env.SESSION_SECRET) {
-  console.error('ERROR: SESSION_SECRET environment variable is required');
-  process.exit(1);
-}
-
 if (!process.env.MONGODB_URI) {
-  console.error('ERROR: MONGODB_URI environment variable is required');
+  console.error('❌ MONGODB_URI environment variable is required');
   process.exit(1);
 }
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600 // lazy session update
-  }),
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-    httpOnly: true,
-    secure: false // set to true in production with HTTPS
-  }
-}));
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is required');
+  process.exit(1);
+}
 
 // DB Connection
 dbConnect.then(() => {
   console.log("DB connection confirmed in app.js");
 });
 
-// 🔐 Auth Middleware
-function requireLogin(req, res ,next) {
-  if (!req.session.userId) {
+// 🔐 JWT Auth Middleware
+function requireLogin(req, res, next) {
+  const token = req.cookies.authToken;
+  
+  if (!token) {
     return res.redirect("/login");
   }
-  else{
-     return next()
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch (err) {
+    console.error('JWT verification failed:', err);
+    res.clearCookie('authToken');
+    return res.redirect("/login");
   }
 }
 
@@ -70,8 +64,8 @@ async function checkOwnership(req, res, next) {
       return res.status(404).send("Hisaab not found");
     }
     
-    // Compare MongoDB _id from session with hisaab.user field (not hisaab.userId)
-    if (hisaab.user.toString() !== req.session.userId.toString()) {
+    // Compare MongoDB _id from JWT with hisaab.user field
+    if (hisaab.user.toString() !== req.userId.toString()) {
       return res.status(403).send("Access denied. You can only modify your own hisaabs.");
     }
     
@@ -86,15 +80,23 @@ async function checkOwnership(req, res, next) {
 
 app.get("/", async (req, res) => {
   try {
-    // Check if user is logged in
-    const isLoggedIn = !!req.session.userId;
+    // Check if user is logged in via JWT
+    const token = req.cookies.authToken;
+    let isLoggedIn = false;
     let userUId = null;
     
-    if (isLoggedIn) {
-      // Get the user's custom uId from database
-      const user = await userModel.findById(req.session.userId);
-      if (user) {
-        userUId = user.uId;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        isLoggedIn = true;
+        // Get the user's custom uId from database
+        const user = await userModel.findById(decoded.userId);
+        if (user) {
+          userUId = user.uId;
+        }
+      } catch (err) {
+        // Invalid token, clear it
+        res.clearCookie('authToken');
       }
     }
     
@@ -107,14 +109,8 @@ app.get("/", async (req, res) => {
 
 // Logout
 app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Session destruction error:', err);
-      return res.status(500).send("Error logging out");
-    }
-    res.clearCookie('connect.sid'); // Clear session cookie
-    res.redirect("/");
-  });
+  res.clearCookie('authToken'); // Clear JWT cookie
+  res.redirect("/");
 });
 
 // SignUp
@@ -133,10 +129,33 @@ app.post("/signUp", async (req, res) => {
   const idDate = now.getTime();
 
   try {
-    const userAcc = await userModel.create({ username, email, password , uId:idDate , dateCreated:nameDate });
-    // Set session after successful signup
-    req.session.userId = userAcc._id;
-    res.redirect("/"); // Redirect to main route with session
+    // Hash password before storing
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    const userAcc = await userModel.create({ 
+      username, 
+      email, 
+      password: hashedPassword, 
+      uId: idDate, 
+      dateCreated: nameDate 
+    });
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: userAcc._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    // Set JWT as HTTP-only cookie
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    
+    res.redirect("/"); // Redirect to main route
   } catch (err) {
     console.log(err);
     res.status(500).send("Error creating account");
@@ -161,10 +180,26 @@ app.post("/login", async (req, res) => {
       return res.status(404).json({ message: "User not Found (Create Account if new!)" });
     }
 
-    if (user.password !== password) {
+    // Use bcrypt to compare password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid Credentials" });
     }
-    req.session.userId = user._id; // Set session userId for authentication
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    // Set JWT as HTTP-only cookie
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+    
     res.redirect("/"); // Redirect to main route after login
 
   } catch (err) {
@@ -201,9 +236,9 @@ app.post("/create/:uId", requireLogin, async (req, res) => {
   const idDate = now.getTime().toString();
 
   try {
-    // Get user from session to verify ownership
-    const sessionUser = await userModel.findById(req.session.userId);
-    if (!sessionUser || sessionUser.uId !== userUid) {
+    // Get user from JWT to verify ownership
+    const jwtUser = await userModel.findById(req.userId);
+    if (!jwtUser || jwtUser.uId !== userUid) {
       return res.status(403).send("Unauthorized access");
     }
 
@@ -217,7 +252,7 @@ app.post("/create/:uId", requireLogin, async (req, res) => {
       secretCode: encrypt ? secretCode : "",
       isShare: shareable ? true : false,
       editPerms: editable ? true : false,
-      user: req.session.userId
+      user: req.userId
     });
 
     res.redirect(`/show/${userUid}`);
