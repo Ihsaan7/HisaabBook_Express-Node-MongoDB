@@ -182,9 +182,34 @@ app.post("/login", async (req, res) => {
       return res.status(404).json({ message: "User not Found (Create Account if new!)" });
     }
 
-    // Use bcrypt to compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Login attempt for user:', username);
+    console.log('Password from form:', password);
+    console.log('Stored password hash:', user.password);
+    console.log('Is stored password a hash?', user.password.startsWith('$2b$'));
+
+    let isPasswordValid = false;
+    
+    // Check if password is already hashed (starts with $2b$ for bcrypt)
+    if (user.password.startsWith('$2b$')) {
+      // Password is properly hashed, use bcrypt.compare
+      isPasswordValid = await bcrypt.compare(password, user.password);
+      console.log('Bcrypt comparison result:', isPasswordValid);
+    } else {
+      // Legacy plain text password - compare directly and then update to hashed
+      if (password === user.password) {
+        isPasswordValid = true;
+        console.log('Plain text password matched - will update to hashed');
+        
+        // Update to hashed password for security
+        const saltRounds = 12;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        await userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+        console.log('Password updated to hashed version');
+      }
+    }
+    
     if (!isPasswordValid) {
+      console.log('Password validation failed');
       return res.status(401).json({ message: "Invalid Credentials" });
     }
     
