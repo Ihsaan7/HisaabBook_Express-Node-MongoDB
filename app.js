@@ -14,12 +14,23 @@ app.set("views", __dirname + "/views"); // Explicitly set views directory for Ve
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public')); // Serve static files from public directory with absolute path
+// Validate required environment variables
+if (!process.env.SESSION_SECRET) {
+  console.error('ERROR: SESSION_SECRET environment variable is required');
+  process.exit(1);
+}
+
+if (!process.env.MONGODB_URI) {
+  console.error('ERROR: MONGODB_URI environment variable is required');
+  process.exit(1);
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || "224466",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb+srv://Test:CUHSb1Q37L0Na1JP@cluster0.ip1tc2f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
+    mongoUrl: process.env.MONGODB_URI,
     touchAfter: 24 * 3600 // lazy session update
   }),
   cookie: {
