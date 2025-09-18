@@ -321,8 +321,18 @@ app.get("/showDetail/:uId", async (req, res) => {
     // Pass the user's uId (from the hisaab record) for navbar links
     const userUId = hisaabId.userId;
     
-    // Check if current user is the owner by comparing MongoDB _id with hisaab.user field
-    const isOwner = req.session.userId && req.session.userId.toString() === hisaabId.user.toString();
+    // Check if current user is the owner by checking JWT token
+    let isOwner = false;
+    const token = req.cookies.authToken;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        isOwner = decoded.userId && decoded.userId.toString() === hisaabId.user.toString();
+      } catch (err) {
+        // Invalid token, user is not authenticated
+        isOwner = false;
+      }
+    }
     
     res.render("hisaabDetail", { hisaabId, hId, flag, userUId, isOwner }); // Pass isOwner flag to template
   } catch (err) {
